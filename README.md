@@ -60,11 +60,15 @@ SESSION_NAME=VID_20230602_085920_00_011_office5
 python convert.py -s ./Data/${SESSION_NAME}/colmap --skip_matching
 ```
 
-To run the optimizer, simply use
-
+To run the optimizer, simply use :
 ```shell
-python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 8 \
---iterations 60_000
+python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 8 --iterations 60_000
+```
+
+for general outdoor scenes :
+```shell
+python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 8 --iterations 60_000 \
+--position_lr_init 0.000016 --scaling_lr 0.001
 ```
 
 <details>
@@ -262,6 +266,14 @@ TRAIN_ID=2fbbfa1f-1
 /gaussian-splatting/SIBR_viewers/install/bin/SIBR_gaussianViewer_app \
 -m /gaussian-splatting/output/${TRAIN_ID}
 ```
+
+<div align="center">    
+<video src="assets/3d_gaussian_test_jmw.mp4" controls="controls" width="75%"></video>
+</div>
+
+<div align="center">    
+<video src="assets/3d_gaussian_test_dm_office.mp4" controls="controls" width="75%"></video>
+</div>
 
 It should suffice to provide the ```-m``` parameter pointing to a trained model directory. Alternatively, you can specify an override location for training input data using ```-s```. To use a specific resolution other than the auto-chosen one, specify ```--rendering-size <width> <height>```. Combine it with ```--force-aspect-ratio``` if you want the exact resolution and don't mind image distortion.
 
