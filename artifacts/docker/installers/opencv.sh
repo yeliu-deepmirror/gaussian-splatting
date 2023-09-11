@@ -27,10 +27,9 @@ pushd opencv-${OPENCV_VERSION}
 mkdir build
 pushd build
 # /gaussian-splatting/cmake/cmake-3.27.4-linux-x86_64/bin/cmake
-cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
-  -D ENABLE_PRECOMPILED_HEADERS=OFF -D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-${OPENCV_VERSION}/modules \
-  -D WITH_VTK=ON -D WITH_CUDA=OFF -D OPENCV_FORCE_3RDPARTY_BUILD=ON -D WITH_PROTOBUF=OFF -D BUILD_PROTOBUF=OFF \
-  -D BUILD_LIST=calib3d,highgui,imgcodecs,flann,features2d,gapi,video,videoio,imgproc,line_descriptor ..
+/gaussian-splatting/cmake/cmake-3.27.4-linux-x86_64/bin/cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local \
+  -D ENABLE_PRECOMPILED_HEADERS=OFF -D OPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-4.5.3/modules \
+  -D WITH_VTK=ON -D WITH_CUDA=OFF -D OPENCV_FORCE_3RDPARTY_BUILD=ON -D WITH_PROTOBUF=OFF -D BUILD_PROTOBUF=OFF ..
 make -j$(($(nproc)-1))
 make install
 popd
