@@ -54,10 +54,17 @@ conda activate gaussian_splatting
 
 ### Running
 
+convert colmap built data session:
+```shell
+SESSION_NAME=VID_20230602_085920_00_011_office5
+python convert.py -s ./Data/${SESSION_NAME}/colmap --skip_matching
+```
+
 To run the optimizer, simply use
 
 ```shell
-python train.py -s <path to COLMAP or NeRF Synthetic dataset>
+SESSION_NAME=VID_20230602_085920_00_011_office5
+python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 4
 ```
 
 <details>
