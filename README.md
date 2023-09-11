@@ -65,6 +65,8 @@ To run the optimizer, simply use
 ```shell
 SESSION_NAME=VID_20230602_085920_00_011_office5
 python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 4
+
+python render.py -m <path to trained model>
 ```
 
 <details>
@@ -238,47 +240,17 @@ python full_eval.py -m <directory with evaluation images>/garden ... --skip_trai
 ## Interactive Viewers
 We provide two interactive viewers for our method: remote and real-time. Our viewing solutions are based on the [SIBR](https://sibr.gitlabpages.inria.fr/) framework, developed by the GRAPHDECO group for several novel-view synthesis projects.
 
-### Hardware Requirements
-- OpenGL 4.5-ready GPU and drivers (or latest MESA software)
-- 4 GB VRAM recommended
-- CUDA-ready GPU with Compute Capability 7.0+ (only for Real-Time Viewer)
-
-### Software Requirements
-- Visual Studio or g++, **not Clang** (we used Visual Studio 2019 for Windows)
-- CUDA SDK 11, install *after* Visual Studio (we used 11.8)
-- CMake (recent version, we used 3.24)
-- 7zip (only on Windows)
-
-### Pre-built Windows Binaries
-We provide pre-built binaries for Windows [here](https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/binaries/viewers.zip). We recommend using them on Windows for an efficient setup, since the building of SIBR involves several external dependencies that must be downloaded and compiled on-the-fly.
-
-### Installation from Source
-If you cloned with submodules (e.g., using ```--recursive```), the source code for the viewers is found in ```SIBR_viewers```. The network viewer runs within the SIBR framework for Image-based Rendering applications.
-
-#### Windows
-CMake should take care of your dependencies.
-```shell
-cd SIBR_viewers
-cmake -Bbuild .
-cmake --build build --target install --config RelWithDebInfo
-```
-You may specify a different configuration, e.g. ```Debug``` if you need more control during development.
-
-#### Ubuntu 22.04
-You will need to install a few dependencies before running the project setup.
-```shell
-# Dependencies
-sudo apt install -y libglew-dev libassimp-dev libboost-all-dev libgtk-3-dev libopencv-dev libglfw3-dev libavdevice-dev libavcodec-dev libeigen3-dev libxxf86vm-dev libembree-dev
-# Project setup
-cd SIBR_viewers
-cmake -Bbuild . -DCMAKE_BUILD_TYPE=Release # add -G Ninja to build faster
-cmake --build build -j24 --target install
-```
-
 #### Ubuntu 20.04
 Backwards compatibility with Focal Fossa is not fully tested, but building SIBR with CMake should still work after invoking
 ```shell
+# Dependencies
+sudo apt install -y libglew-dev libassimp-dev libboost-all-dev libgtk-3-dev libglfw3-dev libavdevice-dev libavcodec-dev libeigen3-dev libxxf86vm-dev libembree-dev
+sudo bash ./artifacts/docker/installers/opencv.sh
+# Project setup
+cd SIBR_viewers
 git checkout fossa_compatibility
+/gaussian-splatting/cmake/cmake-3.27.4-linux-x86_64/bin/cmake -Bbuild . -DCMAKE_BUILD_TYPE=Release # add -G Ninja to build faster
+/gaussian-splatting/cmake/cmake-3.27.4-linux-x86_64/bin/cmake --build build -j8 --target install
 ```
 
 ### Navigation in SIBR Viewers
@@ -310,14 +282,6 @@ The network viewer allows you to connect to a running training process on the sa
 <br>
 
 ### Running the Real-Time Viewer
-
-
-
-
-https://github.com/graphdeco-inria/gaussian-splatting/assets/40643808/0940547f-1d82-4c2f-a616-44eabbf0f816
-
-
-
 
 After extracting or installing the viewers, you may run the compiled ```SIBR_gaussianViewer_app[_config]``` app in ```<SIBR install dir>/bin```, e.g.:
 ```shell
@@ -352,106 +316,3 @@ SIBR has many other functionalities, please see the [documentation](https://sibr
   Disables CUDA/GL interop forcibly. Use on systems that may not behave according to spec (e.g., WSL2 with MESA GL 4.5 software rendering).
 </details>
 <br>
-
-## Processing your own Scenes
-
-Our COLMAP loaders expect the following dataset structure in the source path location:
-
-```
-<location>
-|---images
-|   |---<image 0>
-|   |---<image 1>
-|   |---...
-|---sparse
-    |---0
-        |---cameras.bin
-        |---images.bin
-        |---points3D.bin
-```
-
-For rasterization, the camera models must be either a SIMPLE_PINHOLE or PINHOLE camera. We provide a converter script ```convert.py```, to extract undistorted images and SfM information from input images. Optionally, you can use ImageMagick to resize the undistorted images. This rescaling is similar to MipNeRF360, i.e., it creates images with 1/2, 1/4 and 1/8 the original resolution in corresponding folders. To use them, please first install a recent version of COLMAP (ideally CUDA-powered) and ImageMagick. Put the images you want to use in a directory ```<location>/input```.
-```
-<location>
-|---input
-    |---<image 0>
-    |---<image 1>
-    |---...
-```
- If you have COLMAP and ImageMagick on your system path, you can simply run
-```shell
-python convert.py -s <location> [--resize] #If not resizing, ImageMagick is not needed
-```
-Alternatively, you can use the optional parameters ```--colmap_executable``` and ```--magick_executable``` to point to the respective paths. Please note that on Windows, the executable should point to the COLMAP ```.bat``` file that takes care of setting the execution environment. Once done, ```<location>``` will contain the expected COLMAP data set structure with undistorted, resized input images, in addition to your original images and some temporary (distorted) data in the directory ```distorted```.
-
-If you have your own COLMAP dataset without undistortion (e.g., using ```OPENCV``` camera), you can try to just run the last part of the script: Put the images in ```input``` and the COLMAP info in a subdirectory ```distorted```:
-```
-<location>
-|---input
-|   |---<image 0>
-|   |---<image 1>
-|   |---...
-|---distorted
-    |---database.db
-    |---sparse
-        |---0
-            |---...
-```
-Then run
-```shell
-python convert.py -s <location> --skip_matching [--resize] #If not resizing, ImageMagick is not needed
-```
-
-<details>
-<summary><span style="font-weight: bold;">Command Line Arguments for convert.py</span></summary>
-
-  #### --no_gpu
-  Flag to avoid using GPU in COLMAP.
-  #### --skip_matching
-  Flag to indicate that COLMAP info is available for images.
-  #### --source_path / -s
-  Location of the inputs.
-  #### --camera
-  Which camera model to use for the early matching steps, ```OPENCV``` by default.
-  #### --resize
-  Flag for creating resized versions of input images.
-  #### --colmap_executable
-  Path to the COLMAP executable (```.bat``` on Windows).
-  #### --magick_executable
-  Path to the ImageMagick executable.
-</details>
-<br>
-
-## FAQ
-- *Where do I get data sets, e.g., those referenced in ```full_eval.py```?* The MipNeRF360 data set is provided by the authors of the original paper on the project site. Note that two of the data sets cannot be openly shared and require you to consult the authors directly. For Tanks&Temples and Deep Blending, please use the download links provided at the top of the page. Alternatively, you may access the cloned data (status: August 2023!) from [HuggingFace](https://huggingface.co/camenduru/gaussian-splatting)
-
-
-- *How can I use this for a much larger dataset, like a city district?* The current method was not designed for these, but given enough memory, it should work out. However, the approach can struggle in multi-scale detail scenes (extreme close-ups, mixed with far-away shots). This is usually the case in, e.g., driving data sets (cars close up, buildings far away). For such scenes, you can lower the ```--position_lr_init```, ```--position_lr_final``` and ```--scaling_lr``` (x0.3, x0.1, ...). The more extensive the scene, the lower these values should be. Below, we use default learning rates (left) and ```--position_lr_init 0.000016 --scaling_lr 0.001"``` (right).
-
-| ![Default learning rate result](assets/worse.png "title-1") <!-- --> | <!-- --> ![Reduced learning rate result](assets/better.png "title-2") |
-| --- | --- |
-
-- *I'm on Windows and I can't manage to build the submodules, what do I do?* Consider following the steps in the excellent video tutorial [here](https://www.youtube.com/watch?v=UXtuigy_wYc), hopefully they should help. The order in which the steps are done is important! Alternatively, consider using the linked Colab template.
-
-- *It still doesn't work. It says something about ```cl.exe```. What do I do?* User Henry Pearce found a workaround. You can you try adding the visual studio path to your environment variables (your version number might differ);
-```C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\bin\Hostx64\x64```
-Then make sure you start a new conda prompt and cd to your repo location and try this;
-```
-conda activate gaussian_splatting
-cd <dir_to_repo>/gaussian-splatting
-pip install submodules\diff-gaussian-rasterization
-pip install submodules\simple-knn
-```
-
-- *I'm on macOS/Puppy Linux/Greenhat and I can't manage to build, what do I do?* Sorry, we can't provide support for platforms outside of the ones we list in this README. Consider using the linked Colab template.
-
-- *I don't have 24 GB of VRAM for training, what do I do?* The VRAM consumption is determined by the number of points that are being optimized, which increases over time. If you only want to train to 7k iterations, you will need significantly less. To do the full training routine and avoid running out of memory, you can increase the ```--densify_grad_threshold```, ```--densification_interval``` or reduce the value of ```--densify_until_iter```. Note however that this will affect the quality of the result. Also try setting ```--test_iterations``` to ```-1``` to avoid memory spikes during testing. If ```--densify_grad_threshold``` is very high, no densification should occur and training should complete if the scene itself loads successfully.
-
-- *24 GB of VRAM for reference quality training is still a lot! Can't we do it with less?* Yes, most likely. By our calculations it should be possible with **way** less memory (~8GB). If we can find the time we will try to achieve this. If some PyTorch veteran out there wants to tackle this, we look forward to your pull request!
-
-
-- *How can I use the differentiable Gaussian rasterizer for my own project?* Easy, it is included in this repo as a submodule ```diff-gaussian-rasterization```. Feel free to check out and install the package. It's not really documented, but using it from the Python side is very straightforward (cf. ```gaussian_renderer/__init__.py```).
-
-- *Wait, but ```<insert feature>``` isn't optimized and could be much better?* There are several parts we didn't even have time to think about improving (yet). The performance you get with this prototype is probably a rather slow baseline for what is physically possible.
-
-- *Something is broken, how did this happen?* We tried hard to provide a solid and comprehensible basis to make use of the paper's method. We have refactored the code quite a bit, but we have limited capacity to test all possible usage scenarios. Thus, if part of the website, the code or the performance is lacking, please create an issue. If we find the time, we will do our best to address it.
