@@ -267,13 +267,9 @@ TRAIN_ID=2fbbfa1f-1
 -m /gaussian-splatting/output/${TRAIN_ID}
 ```
 
-<div align="center">    
-<video src="assets/3d_gaussian_test_jmw.mp4" controls="controls" width="75%"></video>
-</div>
+https://github.com/yeliu-deepmirror/gaussian-splatting/assets/74998488/cae483ec-e89c-418e-94f1-e8988f016fbd
 
-<div align="center">    
-<video src="assets/3d_gaussian_test_dm_office.mp4" controls="controls" width="75%"></video>
-</div>
+https://github.com/yeliu-deepmirror/gaussian-splatting/assets/74998488/42c3a9d5-4476-4703-8b4c-c26ce74fd7a6
 
 It should suffice to provide the ```-m``` parameter pointing to a trained model directory. Alternatively, you can specify an override location for training input data using ```-s```. To use a specific resolution other than the auto-chosen one, specify ```--rendering-size <width> <height>```. Combine it with ```--force-aspect-ratio``` if you want the exact resolution and don't mind image distortion.
 
