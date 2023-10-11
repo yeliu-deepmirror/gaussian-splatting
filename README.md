@@ -136,7 +136,7 @@ python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 8 --ite
   Iteration where densification stops, ```15_000``` by default.
   #### --densify_grad_threshold
   Limit that decides if points should be densified based on 2D position gradient, ```0.0002``` by default.
-  #### --densification_interal
+  #### --densification_interval
   How frequently to densify, ```100``` (every 100 iterations) by default.
   #### --opacity_reset_interval
   How frequently to reset opacity, ```3_000``` by default.
@@ -277,7 +277,7 @@ It should suffice to provide the ```-m``` parameter pointing to a trained model 
 
 <!-- ![Teaser image](assets/select.png) -->
 
-In addition to the intial point cloud and the splats, you also have the option to visualize the Gaussians by rendering them as ellipsoids from the floating menu.
+In addition to the initial point cloud and the splats, you also have the option to visualize the Gaussians by rendering them as ellipsoids from the floating menu.
 SIBR has many other functionalities, please see the [documentation](https://sibr.gitlabpages.inria.fr/) for more details on the viewer, navigation options etc. There is also a Top View (available from the menu) that shows the placement of the input cameras and the original SfM point cloud; please note that Top View slows rendering when enabled. The real-time viewer also uses slightly more aggressive, fast culling, which can be toggled in the floating menu. If you ever encounter an issue that can be solved by turning fast culling off, please let us know.
 
 <details>
