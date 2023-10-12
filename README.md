@@ -6,33 +6,17 @@ Bernhard Kerbl*, Georgios Kopanas*, Thomas Leimkühler, George Drettakis (* indi
 
 This repository contains the official authors implementation associated with the paper "3D Gaussian Splatting for Real-Time Radiance Field Rendering", which can be found [here](https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/). We further provide the reference images used to create the error metrics reported in the paper, as well as recently created, pre-trained models.
 
-<a href="https://www.inria.fr/"><img height="100" src="assets/logo_inria.png"> </a>
-<a href="https://univ-cotedazur.eu/"><img height="100" src="assets/logo_uca.png"> </a>
-<a href="https://www.mpi-inf.mpg.de"><img height="100" src="assets/logo_mpi.png"> </a>
-<a href="https://team.inria.fr/graphdeco/"> <img style="width:100%;" src="assets/logo_graphdeco.png"></a>
+<a href="https://www.inria.fr/"><img style="width:25%;" src="assets/logo_inria.png"></a>
+<a href="https://univ-cotedazur.eu/"><img style="width:25%;" src="assets/logo_uca.png"></a>
+<a href="https://www.mpi-inf.mpg.de"><img style="width:25%;" src="assets/logo_mpi.png"></a>
+<a href="https://team.inria.fr/graphdeco/"> <img style="width:25%;" src="assets/logo_graphdeco.png"></a>
 
 Abstract: *Radiance Field methods have recently revolutionized novel-view synthesis of scenes captured with multiple photos or videos. However, achieving high visual quality still requires neural networks that are costly to train and render, while recent faster methods inevitably trade off speed for quality. For unbounded and complete scenes (rather than isolated objects) and 1080p resolution rendering, no current method can achieve real-time display rates. We introduce three key elements that allow us to achieve state-of-the-art visual quality while maintaining competitive training times and importantly allow high-quality real-time (≥ 30 fps) novel-view synthesis at 1080p resolution. First, starting from sparse points produced during camera calibration, we represent the scene with 3D Gaussians that preserve desirable properties of continuous volumetric radiance fields for scene optimization while avoiding unnecessary computation in empty space; Second, we perform interleaved optimization/density control of the 3D Gaussians, notably optimizing anisotropic covariance to achieve an accurate representation of the scene; Third, we develop a fast visibility-aware rendering algorithm that supports anisotropic splatting and both accelerates training and allows realtime rendering. We demonstrate state-of-the-art visual quality and real-time rendering on several established datasets.*
 
-<section class="section" id="BibTeX">
-  <div class="container is-max-desktop content">
-    <h2 class="title">BibTeX</h2>
-    <pre><code>@Article{kerbl3Dgaussians,
-      author       = {Kerbl, Bernhard and Kopanas, Georgios and Leimk{\"u}hler, Thomas and Drettakis, George},
-      title        = {3D Gaussian Splatting for Real-Time Radiance Field Rendering},
-      journal      = {ACM Transactions on Graphics},
-      number       = {4},
-      volume       = {42},
-      month        = {July},
-      year         = {2023},
-      url          = {https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/}
-}</code></pre>
-  </div>
-</section>
 
 ## Optimizer
 
-see [the raw repo](https://github.com/graphdeco-inria/gaussian-splatting) for more instructions.
-
+See [the raw repo](https://github.com/graphdeco-inria/gaussian-splatting) for more instructions.
 The optimizer uses PyTorch and CUDA extensions in a Python environment to produce trained models.
 
 ### Setup
@@ -145,97 +129,10 @@ python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 8 --ite
   #### --percent_dense
   Percentage of scene extent (0--1) a point must exceed to be forcibly densified, ```0.01``` by default.
 
-</details>
-<br>
-
 Note that similar to MipNeRF360, we target images at resolutions in the 1-1.6K pixel range. For convenience, arbitrary-size inputs can be passed and will be automatically resized if their width exceeds 1600 pixels. We recommend to keep this behavior, but you may force training to use your higher-resolution images by setting ```-r 1```.
 
 The MipNeRF360 scenes are hosted by the paper authors [here](https://jonbarron.info/mipnerf360/). You can find our SfM data sets for Tanks&Temples and Deep Blending [here](https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/datasets/input/tandt_db.zip). If you do not provide an output model directory (```-m```), trained models are written to folders with randomized unique names inside the ```output``` directory. At this point, the trained models may be viewed with the real-time viewer (see further below).
 
-### Evaluation
-By default, the trained models use all available images in the dataset. To train them while withholding a test set for evaluation, use the ```--eval``` flag. This way, you can render training/test sets and produce error metrics as follows:
-```shell
-python train.py -s <path to COLMAP or NeRF Synthetic dataset> --eval # Train with train/test split
-python render.py -m <path to trained model> # Generate renderings
-python metrics.py -m <path to trained model> # Compute error metrics on renderings
-```
-
-If you want to evaluate our [pre-trained models](https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/datasets/pretrained/models.zip), you will have to download the corresponding source data sets and indicate their location to ```render.py``` with an additional ```--source_path/-s``` flag. Note: The pre-trained models were created with the release codebase. This code base has been cleaned up and includes bugfixes, hence the metrics you get from evaluating them will differ from those in the paper.
-```shell
-python render.py -m <path to pre-trained model> -s <path to COLMAP dataset>
-python metrics.py -m <path to pre-trained model>
-```
-
-<details>
-<summary><span style="font-weight: bold;">Command Line Arguments for render.py</span></summary>
-
-  #### --model_path / -m
-  Path to the trained model directory you want to create renderings for.
-  #### --skip_train
-  Flag to skip rendering the training set.
-  #### --skip_test
-  Flag to skip rendering the test set.
-  #### --quiet
-  Flag to omit any text written to standard out pipe.
-
-  **The below parameters will be read automatically from the model path, based on what was used for training. However, you may override them by providing them explicitly on the command line.**
-
-  #### --source_path / -s
-  Path to the source directory containing a COLMAP or Synthetic NeRF data set.
-  #### --images / -i
-  Alternative subdirectory for COLMAP images (```images``` by default).
-  #### --eval
-  Add this flag to use a MipNeRF360-style training/test split for evaluation.
-  #### --resolution / -r
-  Changes the resolution of the loaded images before training. If provided ```1, 2, 4``` or ```8```, uses original, 1/2, 1/4 or 1/8 resolution, respectively. For all other values, rescales the width to the given number while maintaining image aspect. ```1``` by default.
-  #### --white_background / -w
-  Add this flag to use white background instead of black (default), e.g., for evaluation of NeRF Synthetic dataset.
-  #### --convert_SHs_python
-  Flag to make pipeline render with computed SHs from PyTorch instead of ours.
-  #### --convert_cov3D_python
-  Flag to make pipeline render with computed 3D covariance from PyTorch instead of ours.
-
-</details>
-
-<details>
-<summary><span style="font-weight: bold;">Command Line Arguments for metrics.py</span></summary>
-
-  #### --model_paths / -m
-  Space-separated list of model paths for which metrics should be computed.
-</details>
-<br>
-
-We further provide the ```full_eval.py``` script. This script specifies the routine used in our evaluation and demonstrates the use of some additional parameters, e.g., ```--images (-i)``` to define alternative image directories within COLMAP data sets. If you have downloaded and extracted all the training data, you can run it like this:
-```shell
-python full_eval.py -m360 <mipnerf360 folder> -tat <tanks and temples folder> -db <deep blending folder>
-```
-In the current version, this process takes about 7h on our reference machine containing an A6000. If you want to do the full evaluation on our pre-trained models, you can specify their download location and skip training.
-```shell
-python full_eval.py -o <directory with pretrained models> --skip_training -m360 <mipnerf360 folder> -tat <tanks and temples folder> -db <deep blending folder>
-```
-
-If you want to compute the metrics on our paper's [evaluation images](https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/evaluation/images.zip), you can also skip rendering. In this case it is not necessary to provide the source datasets. You can compute metrics for multiple image sets at a time.
-```shell
-python full_eval.py -m <directory with evaluation images>/garden ... --skip_training --skip_rendering
-```
-
-<details>
-<summary><span style="font-weight: bold;">Command Line Arguments for full_eval.py</span></summary>
-
-  #### --skip_training
-  Flag to skip training stage.
-  #### --skip_rendering
-  Flag to skip rendering stage.
-  #### --skip_metrics
-  Flag to skip metrics calculation stage.
-  #### --output_path
-  Directory to put renderings and results in, ```./eval``` by default, set to pre-trained model location if evaluating them.
-  #### --mipnerf360 / -m360
-  Path to MipNeRF360 source datasets, required if training or rendering.
-  #### --tanksandtemples / -tat
-  Path to Tanks&Temples source datasets, required if training or rendering.
-  #### --deepblending / -db
-  Path to Deep Blending source datasets, required if training or rendering.
 </details>
 <br>
 
@@ -299,3 +196,19 @@ SIBR has many other functionalities, please see the [documentation](https://sibr
   Disables CUDA/GL interop forcibly. Use on systems that may not behave according to spec (e.g., WSL2 with MESA GL 4.5 software rendering).
 </details>
 <br>
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@Article{kerbl3Dgaussians,
+      author       = {Kerbl, Bernhard and Kopanas, Georgios and Leimk{\"u}hler, Thomas and Drettakis, George},
+      title        = {3D Gaussian Splatting for Real-Time Radiance Field Rendering},
+      journal      = {ACM Transactions on Graphics},
+      number       = {4},
+      volume       = {42},
+      month        = {July},
+      year         = {2023},
+      url          = {https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/}
+}</code></pre>
+  </div>
+</section>

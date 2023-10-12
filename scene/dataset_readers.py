@@ -137,6 +137,18 @@ def storePly(path, xyz, rgb):
     ply_data = PlyData([vertex_element])
     ply_data.write(path)
 
+
+def readPointcloud(path, save_ply_path):
+    lidar_pointcloud_file = os.path.join(path, "map_point_cloud_local.ply")
+    if not os.path.exists(lidar_pointcloud_file):
+        return False
+
+    print("  - use lidar map_point_cloud.ply")
+    import shutil
+    shutil.copyfile(lidar_pointcloud_file, save_ply_path)
+    return True
+
+
 def readColmapSceneInfo(path, images, eval, llffhold=8):
     try:
         cameras_extrinsic_file = os.path.join(path, "sparse/0", "images.bin")
@@ -167,11 +179,12 @@ def readColmapSceneInfo(path, images, eval, llffhold=8):
     txt_path = os.path.join(path, "sparse/0/points3D.txt")
     if not os.path.exists(ply_path):
         print("Converting point3d.bin to .ply, will happen only the first time you open the scene.")
-        try:
-            xyz, rgb, _ = read_points3D_binary(bin_path)
-        except:
-            xyz, rgb, _ = read_points3D_text(txt_path)
-        storePly(ply_path, xyz, rgb)
+        if not readPointcloud(path, ply_path):
+            try:
+                xyz, rgb, _ = read_points3D_binary(bin_path)
+            except:
+                xyz, rgb, _ = read_points3D_text(txt_path)
+            storePly(ply_path, xyz, rgb)
     try:
         pcd = fetchPly(ply_path)
     except:

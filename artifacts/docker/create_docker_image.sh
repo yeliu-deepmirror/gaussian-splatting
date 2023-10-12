@@ -4,7 +4,7 @@
 DIR=$(dirname $(realpath "$BASH_SOURCE"))
 
 docker image build \
-    --tag plenoxel \
+    --tag gaussian-splatting \
     --build-arg usr=$(id -u -n) \
     --build-arg uid=$(id -u) \
     --build-arg grp=$(id -g -n) \
