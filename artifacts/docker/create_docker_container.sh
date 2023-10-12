@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-NAME="plenoxel"
-IMAGE="plenoxel"
-WORKDIR=/home/$USER/svox2
+NAME="gaussian-splatting"
+IMAGE="gaussian-splatting"
+WORKDIR=/home/$USER/gaussian-splatting
 
 # Check if the container exists.
 if docker ps -a --format "{{.Names}}" | grep -q "^$NAME$"; then
