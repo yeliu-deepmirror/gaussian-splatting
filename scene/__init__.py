@@ -101,8 +101,11 @@ class Scene:
         camera = self.train_cameras[train_id]
         return loadCam(self.args, train_id, camera, scale) # read image from file
 
-    def getTrainCameras(self, scale=1.0):
-        return self.train_cameras[scale]
+    def getTestSize(self):
+        return len(self.test_cameras)
 
-    def getTestCameras(self, scale=1.0):
-        return self.test_cameras[scale]
+    # def getTrainCameras(self, scale=1.0):
+    #     return self.train_cameras[scale]
+    #
+    # def getTestCameras(self, scale=1.0):
+    #     return self.test_cameras[scale]

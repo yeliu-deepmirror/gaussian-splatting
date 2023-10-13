@@ -74,7 +74,7 @@ python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 8 --ite
 --position_lr_init 0.000016 --scaling_lr 0.001
 
 python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 2 --iterations 30_000 \
---position_lr_init 0.000016 --scaling_lr 0.001 --data_device cpu
+--position_lr_init 0.000016 --scaling_lr 0.001 --front_only
 ```
 
 <details>
