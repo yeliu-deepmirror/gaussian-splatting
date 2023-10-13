@@ -21,6 +21,8 @@ The optimizer uses PyTorch and CUDA extensions in a Python environment to produc
 
 ### Setup
 
+**Fork to keep tracking the latest updates.**
+
 #### Local Setup
 
 create and run docker environment:
