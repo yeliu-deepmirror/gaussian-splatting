@@ -255,6 +255,7 @@ class GaussianModel:
         self._rotation = nn.Parameter(torch.tensor(rots, dtype=torch.float, device="cuda").requires_grad_(True))
 
         self.active_sh_degree = self.max_sh_degree
+        self.max_radii2D = torch.zeros((self.get_xyz.shape[0]), device="cuda")
 
     def replace_tensor_to_optimizer(self, tensor, name):
         optimizable_tensors = {}

@@ -10,6 +10,7 @@
 #
 
 import os
+import gc
 import random
 from random import randint
 import json
@@ -25,7 +26,7 @@ from utils.camera_utils import cameraList_from_camInfos, camera_to_JSON, loadCam
 class Scene:
     gaussians : GaussianModel
 
-    def __init__(self, args : ModelParams, gaussians : GaussianModel, load_iteration=None, shuffle=True, resolution_scales=[1.0]):
+    def __init__(self, args : ModelParams, gaussians : GaussianModel, load_iteration=-1, shuffle=True, resolution_scales=[1.0]):
         """b
         :param path: Path to colmap scene main folder.
         """
@@ -35,12 +36,13 @@ class Scene:
         self.args = args
         self.resolution_scales = resolution_scales
 
-        if load_iteration:
+        if load_iteration is not None:
             if load_iteration == -1:
                 self.loaded_iter = searchForMaxIteration(os.path.join(self.model_path, "point_cloud"))
             else:
                 self.loaded_iter = load_iteration
-            print("Loading trained model at iteration {}".format(self.loaded_iter))
+            if self.loaded_iter is not None:
+                print("Loading trained model at iteration {}".format(self.loaded_iter))
 
         if os.path.exists(os.path.join(args.source_path, "sparse")):
             scene_info = sceneLoadTypeCallbacks["Colmap"](args.source_path, args.images, args.eval, args.front_only)
@@ -79,6 +81,9 @@ class Scene:
             self.gaussians.load_ply(os.path.join(self.model_path, "point_cloud", "iteration_" + str(self.loaded_iter), "point_cloud.ply"))
         else:
             self.gaussians.create_from_pcd(scene_info.point_cloud, self.cameras_extent)
+        del scene_info
+        gc.collect()
+
 
     def save(self, iteration):
         point_cloud_path = os.path.join(self.model_path, "point_cloud/iteration_{}".format(iteration))
