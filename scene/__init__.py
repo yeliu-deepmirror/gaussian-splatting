@@ -35,6 +35,7 @@ class Scene:
         self.gaussians = gaussians
         self.args = args
         self.resolution_scales = resolution_scales
+        self.iteration_offset = 0
 
         if load_iteration is not None:
             if load_iteration == -1:
@@ -42,6 +43,7 @@ class Scene:
             else:
                 self.loaded_iter = load_iteration
             if self.loaded_iter is not None:
+                self.iteration_offset = self.loaded_iter
                 print("Loading trained model at iteration {}".format(self.loaded_iter))
 
         if os.path.exists(os.path.join(args.source_path, "sparse")):
@@ -86,7 +88,7 @@ class Scene:
 
 
     def save(self, iteration):
-        point_cloud_path = os.path.join(self.model_path, "point_cloud/iteration_{}".format(iteration))
+        point_cloud_path = os.path.join(self.model_path, "point_cloud/iteration_{}".format(iteration + self.iteration_offset))
         self.gaussians.save_ply(os.path.join(point_cloud_path, "point_cloud.ply"))
 
     def reset_train_test_ids(self):
