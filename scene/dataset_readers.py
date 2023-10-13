@@ -65,15 +65,22 @@ def getNerfppNorm(cam_info):
 
     return {"translate": translate, "radius": radius}
 
-def readColmapCameras(cam_extrinsics, cam_intrinsics, images_folder):
+def readColmapCameras(cam_extrinsics, cam_intrinsics, images_folder, front_only):
+    if front_only :
+        print("  - Read camera_front only.")
     cam_infos = []
     for idx, key in enumerate(cam_extrinsics):
         sys.stdout.write('\r')
         # the exact output you're looking for:
-        sys.stdout.write("Reading camera {}/{}".format(idx+1, len(cam_extrinsics)))
+        sys.stdout.write("  - Reading camera {}/{}".format(idx+1, len(cam_extrinsics)))
         sys.stdout.flush()
 
         extr = cam_extrinsics[key]
+
+        # use front camera only
+        if front_only and extr.name.find('front') < 0:
+            continue
+
         intr = cam_intrinsics[extr.camera_id]
         height = intr.height
         width = intr.width
@@ -149,7 +156,8 @@ def readPointcloud(path, save_ply_path):
     return True
 
 
-def readColmapSceneInfo(path, images, eval, llffhold=8):
+def readColmapSceneInfo(path, images, eval, front_only=False, llffhold=8):
+    print("Read Colmap model from", path)
     try:
         cameras_extrinsic_file = os.path.join(path, "sparse/0", "images.bin")
         cameras_intrinsic_file = os.path.join(path, "sparse/0", "cameras.bin")
@@ -162,7 +170,8 @@ def readColmapSceneInfo(path, images, eval, llffhold=8):
         cam_intrinsics = read_intrinsics_text(cameras_intrinsic_file)
 
     reading_dir = "images" if images == None else images
-    cam_infos_unsorted = readColmapCameras(cam_extrinsics=cam_extrinsics, cam_intrinsics=cam_intrinsics, images_folder=os.path.join(path, reading_dir))
+    cam_infos_unsorted = readColmapCameras(cam_extrinsics=cam_extrinsics, cam_intrinsics=cam_intrinsics,
+                                           images_folder=os.path.join(path, reading_dir), front_only=front_only)
     cam_infos = sorted(cam_infos_unsorted.copy(), key = lambda x : x.image_name)
 
     if eval:

@@ -36,25 +36,42 @@ conda env create --file environment.yml
 conda activate gaussian_splatting
 ```
 
+### Prepare session
+
+transform to colmap format:
+```
+bazel run -c opt //map/processor/output:colmap_proc_main -- \
+-map_storage_output_directory=/Alpha/Data \
+-map_storage_input_directories=/mnt/gz01/raw,/mnt/gz01/prod/spsg-cosplace-demos \
+-session_name=${SESSION_NAME}
+```
+
+prepare lidar pointcloud data:
+```
+bazel run -c opt //map/tools:transform_pointcloud_main -- \
+-map_storage_output_directory=/LidarMapping/data \
+-map_storage_input_directories=/mnt/gz01/prod/spsg-cosplace-demos \
+-session_name=${SESSION_NAME}
+```
+
 ### Running
 
 convert colmap built data session:
-```shell
-SESSION_NAME=VID_20230602_085920_00_011_office5
+```
 python convert.py -s ./Data/${SESSION_NAME}/colmap --skip_matching
 ```
 
 To run the optimizer, simply use :
-```shell
+```
 python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 8 --iterations 30_000
 ```
 
 for general outdoor scenes :
-```shell
+```
 python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 8 --iterations 30_000 \
 --position_lr_init 0.000016 --scaling_lr 0.001
 
-python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 2 --iterations 60_000 \
+python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 2 --iterations 30_000 \
 --position_lr_init 0.000016 --scaling_lr 0.001 --data_device cpu
 ```
 

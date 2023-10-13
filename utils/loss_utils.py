@@ -3,7 +3,7 @@
 # GRAPHDECO research group, https://team.inria.fr/graphdeco
 # All rights reserved.
 #
-# This software is free for non-commercial, research and evaluation use 
+# This software is free for non-commercial, research and evaluation use
 # under the terms of the LICENSE.md file.
 #
 # For inquiries contact  george.drettakis@inria.fr
@@ -40,6 +40,8 @@ def ssim(img1, img2, window_size=11, size_average=True):
 
     return _ssim(img1, img2, window, window_size, channel, size_average)
 
+# Structural dissimilarity (DSSIM)
+# Structural Similarity-Based Object Tracking in Video Sequences
 def _ssim(img1, img2, window, window_size, channel, size_average=True):
     mu1 = F.conv2d(img1, window, padding=window_size // 2, groups=channel)
     mu2 = F.conv2d(img2, window, padding=window_size // 2, groups=channel)
@@ -61,4 +63,3 @@ def _ssim(img1, img2, window, window_size, channel, size_average=True):
         return ssim_map.mean()
     else:
         return ssim_map.mean(1).mean(1).mean(1)
-
