@@ -6,10 +6,10 @@ Bernhard Kerbl*, Georgios Kopanas*, Thomas Leimkühler, George Drettakis (* indi
 
 This repository contains the official authors implementation associated with the paper "3D Gaussian Splatting for Real-Time Radiance Field Rendering", which can be found [here](https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/). We further provide the reference images used to create the error metrics reported in the paper, as well as recently created, pre-trained models.
 
-<a href="https://www.inria.fr/"><img style="width:25%;" src="assets/logo_inria.png"></a>
-<a href="https://univ-cotedazur.eu/"><img style="width:25%;" src="assets/logo_uca.png"></a>
-<a href="https://www.mpi-inf.mpg.de"><img style="width:25%;" src="assets/logo_mpi.png"></a>
-<a href="https://team.inria.fr/graphdeco/"> <img style="width:25%;" src="assets/logo_graphdeco.png"></a>
+<a href="https://www.inria.fr/"><img style="width:20%;" src="assets/logo_inria.png"></a>
+<a href="https://univ-cotedazur.eu/"><img style="width:20%;" src="assets/logo_uca.png"></a>
+<a href="https://www.mpi-inf.mpg.de"><img style="width:20%;" src="assets/logo_mpi.png"></a>
+<a href="https://team.inria.fr/graphdeco/"> <img style="width:20%;" src="assets/logo_graphdeco.png"></a>
 
 Abstract: *Radiance Field methods have recently revolutionized novel-view synthesis of scenes captured with multiple photos or videos. However, achieving high visual quality still requires neural networks that are costly to train and render, while recent faster methods inevitably trade off speed for quality. For unbounded and complete scenes (rather than isolated objects) and 1080p resolution rendering, no current method can achieve real-time display rates. We introduce three key elements that allow us to achieve state-of-the-art visual quality while maintaining competitive training times and importantly allow high-quality real-time (≥ 30 fps) novel-view synthesis at 1080p resolution. First, starting from sparse points produced during camera calibration, we represent the scene with 3D Gaussians that preserve desirable properties of continuous volumetric radiance fields for scene optimization while avoiding unnecessary computation in empty space; Second, we perform interleaved optimization/density control of the 3D Gaussians, notably optimizing anisotropic covariance to achieve an accurate representation of the scene; Third, we develop a fast visibility-aware rendering algorithm that supports anisotropic splatting and both accelerates training and allows realtime rendering. We demonstrate state-of-the-art visual quality and real-time rendering on several established datasets.*
 
@@ -20,6 +20,8 @@ See [the raw repo](https://github.com/graphdeco-inria/gaussian-splatting) for mo
 The optimizer uses PyTorch and CUDA extensions in a Python environment to produce trained models.
 
 ### Setup
+
+**Fork to keep tracking the latest updates.**
 
 #### Local Setup
 
@@ -36,23 +38,46 @@ conda env create --file environment.yml
 conda activate gaussian_splatting
 ```
 
+### Prepare session
+
+transform to colmap format:
+```
+bazel run -c opt //map/processor/output:colmap_proc_main -- \
+-map_storage_output_directory=/Alpha/Data \
+-map_storage_input_directories=/mnt/gz01/raw,/mnt/gz01/prod/spsg-cosplace-demos \
+-session_name=${SESSION_NAME}
+```
+
+prepare lidar pointcloud data:
+```
+bazel run -c opt //map/tools:transform_pointcloud_main -- \
+-map_storage_output_directory=/LidarMapping/data \
+-map_storage_input_directories=/mnt/gz01/prod/spsg-cosplace-demos \
+-session_name=${SESSION_NAME}
+```
+
 ### Running
 
 convert colmap built data session:
-```shell
-SESSION_NAME=VID_20230602_085920_00_011_office5
+```
 python convert.py -s ./Data/${SESSION_NAME}/colmap --skip_matching
 ```
 
 To run the optimizer, simply use :
-```shell
-python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 8 --iterations 60_000
+```
+python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 1 --iterations 30_000
 ```
 
 for general outdoor scenes :
-```shell
-python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 8 --iterations 60_000 \
---position_lr_init 0.000016 --scaling_lr 0.001
+```
+# fast test
+python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 2 --iterations 30_000 \
+--position_lr_init 0.000016 --scaling_lr 0.001 --front_only
+
+# fine test
+python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 1 --iterations 60_000 \
+--position_lr_init 0.000008 --scaling_lr 0.001 --densify_until_iter 60_000 --position_lr_max_steps 60_000 \
+--densify_grad_threshold 0.0001
 ```
 
 <details>
