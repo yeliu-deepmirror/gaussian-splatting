@@ -44,12 +44,12 @@ class GaussianModel:
     def __init__(self, sh_degree : int):
         self.active_sh_degree = 0
         self.max_sh_degree = sh_degree
-        self._xyz = torch.empty(0)
-        self._features_dc = torch.empty(0)
-        self._features_rest = torch.empty(0)
-        self._scaling = torch.empty(0)
-        self._rotation = torch.empty(0)
-        self._opacity = torch.empty(0)
+        self._xyz = torch.empty(0)                  # N * 3
+        self._features_dc = torch.empty(0)          # N * 1 * 3    basic colors
+        self._features_rest = torch.empty(0)        # N * 15 * 3   SH parameters for degree 3
+        self._scaling = torch.empty(0)              # N * 3
+        self._rotation = torch.empty(0)             # N * 4
+        self._opacity = torch.empty(0)              # N * 1
         self.max_radii2D = torch.empty(0)
         self.xyz_gradient_accum = torch.empty(0)
         self.denom = torch.empty(0)
@@ -129,7 +129,7 @@ class GaussianModel:
         features[:, :3, 0 ] = fused_color
         features[:, 3:, 1:] = 0.0
 
-        print("Number of points at initialisation : ", fused_point_cloud.shape[0])
+        print("Number of points at initialisation:", fused_point_cloud.shape[0], ", with SH size :", features.shape[2])
 
         dist2 = torch.clamp_min(distCUDA2(torch.from_numpy(np.asarray(pcd.points)).float().cuda()), 0.0000001)
         scales = torch.log(torch.sqrt(dist2))[...,None].repeat(1, 3)

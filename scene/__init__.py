@@ -75,6 +75,7 @@ class Scene:
         self.cameras_extent = scene_info.nerf_normalization["radius"]
         self.train_cameras = scene_info.train_cameras
         self.test_cameras = scene_info.test_cameras
+        print("  - Nerf Normalization:", scene_info.nerf_normalization)
         print("  - Load", len(self.train_cameras), "Training Cameras")
         print("  - Load", len(self.test_cameras), "Test Cameras")
         self.reset_train_test_ids()

@@ -75,9 +75,8 @@ python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 2 --ite
 --position_lr_init 0.000016 --scaling_lr 0.001 --front_only
 
 # fine test
-python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 1 --iterations 60_000 \
---position_lr_init 0.000008 --scaling_lr 0.001 --densify_until_iter 60_000 --position_lr_max_steps 60_000 \
---densify_grad_threshold 0.0001
+python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 2 --iterations 30_000 --densify_until_iter 30_000 \
+--position_lr_init 0.000016 --scaling_lr 0.001 --densify_grad_threshold 0.0002 --model_path output/jmw_2
 ```
 
 <details>
