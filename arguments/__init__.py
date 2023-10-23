@@ -53,6 +53,7 @@ class ModelParams(ParamGroup):
         self._resolution = -1
         self._white_background = False
         self.front_only = False
+        self.cut_ratio = 0.02
         self.data_device = "cuda"
         self.eval = False
         super().__init__(parser, "Loading Parameters", sentinel)

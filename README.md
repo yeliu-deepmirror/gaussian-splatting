@@ -76,7 +76,10 @@ python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 2 --ite
 
 # fine test
 python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 2 --iterations 30_000 --densify_until_iter 30_000 \
---position_lr_init 0.000016 --scaling_lr 0.001 --densify_grad_threshold 0.0002 --model_path output/jmw_2
+--position_lr_init 0.000016 --scaling_lr 0.001 --densify_grad_threshold 0.0002 --model_path output/ind
+
+python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 2 --iterations 120_000 --densify_until_iter 120_000 \
+--position_lr_init 0.000016 --scaling_lr 0.001 --densify_grad_threshold 0.0002 --model_path output/ind
 ```
 
 <details>

@@ -21,6 +21,7 @@ import json
 from pathlib import Path
 from plyfile import PlyData, PlyElement
 from utils.sh_utils import SH2RGB
+from utils.graphics_utils import merge_pointclouds
 from scene.gaussian_model import BasicPointCloud
 
 class CameraInfo(NamedTuple):
@@ -65,10 +66,32 @@ def getNerfppNorm(cam_info):
 
     return {"translate": translate, "radius": radius}
 
-def readColmapCameras(cam_extrinsics, cam_intrinsics, images_folder, front_only):
+def name_to_timestamp(name):
+    return int(name.split("/")[1].split(".")[0])
+
+
+def readColmapCameras(cam_extrinsics, cam_intrinsics, images_folder, front_only, cut_ratio):
     if front_only :
         print("  - Read camera_front only.")
     cam_infos = []
+
+    # get timestamp range
+    max_time = 0
+    min_time = sys.maxsize
+    for idx, key in enumerate(cam_extrinsics):
+        timestamp = name_to_timestamp(cam_extrinsics[key].name)
+        if timestamp < min_time:
+            min_time = timestamp
+        if timestamp > max_time:
+            max_time = timestamp
+
+    duration = max_time - min_time
+    print("  - Data timestamp range: [", min_time, max_time, "]. duration:", duration * 1e-9, "s")
+
+    # use data from 10% to 90%
+    min_time_threshold = min_time + duration * cut_ratio
+    max_time_threshold = max_time - duration * cut_ratio
+
     for idx, key in enumerate(cam_extrinsics):
         sys.stdout.write('\r')
         # the exact output you're looking for:
@@ -76,6 +99,10 @@ def readColmapCameras(cam_extrinsics, cam_intrinsics, images_folder, front_only)
         sys.stdout.flush()
 
         extr = cam_extrinsics[key]
+
+        timestamp = name_to_timestamp(extr.name)
+        if timestamp < min_time_threshold or timestamp > max_time_threshold:
+            continue
 
         # use front camera only
         if front_only and extr.name.find('front') < 0:
@@ -146,15 +173,13 @@ def storePly(path, xyz, rgb):
 def readPointcloud(path, save_ply_path):
     lidar_pointcloud_file = os.path.join(path, "map_point_cloud_local.ply")
     if not os.path.exists(lidar_pointcloud_file):
-        return False
+        return None
 
-    print("  - use lidar map_point_cloud.ply")
-    import shutil
-    shutil.copyfile(lidar_pointcloud_file, save_ply_path)
-    return True
+    print("  - add lidar map_point_cloud.ply")
+    return fetchPly(lidar_pointcloud_file)
 
 
-def readColmapSceneInfo(path, images, eval, front_only=False, llffhold=8):
+def readColmapSceneInfo(path, images, eval, front_only=False, cut_ratio=0.0, llffhold=8):
     print("Read Colmap model from", path)
     try:
         cameras_extrinsic_file = os.path.join(path, "sparse/0", "images.bin")
@@ -169,7 +194,8 @@ def readColmapSceneInfo(path, images, eval, front_only=False, llffhold=8):
 
     reading_dir = "images" if images == None else images
     cam_infos_unsorted = readColmapCameras(cam_extrinsics=cam_extrinsics, cam_intrinsics=cam_intrinsics,
-                                           images_folder=os.path.join(path, reading_dir), front_only=front_only)
+                                           images_folder=os.path.join(path, reading_dir), front_only=front_only,
+                                           cut_ratio=cut_ratio)
     cam_infos = sorted(cam_infos_unsorted.copy(), key = lambda x : x.image_name)
 
     if eval:
@@ -184,18 +210,17 @@ def readColmapSceneInfo(path, images, eval, front_only=False, llffhold=8):
     ply_path = os.path.join(path, "sparse/0/points3D.ply")
     bin_path = os.path.join(path, "sparse/0/points3D.bin")
     txt_path = os.path.join(path, "sparse/0/points3D.txt")
-    if not os.path.exists(ply_path):
-        print("Converting point3d.bin to .ply, will happen only the first time you open the scene.")
-        if not readPointcloud(path, ply_path):
-            try:
-                xyz, rgb, _ = read_points3D_binary(bin_path)
-            except:
-                xyz, rgb, _ = read_points3D_text(txt_path)
-            storePly(ply_path, xyz, rgb)
-    try:
+    if True:  # always remake the initial point cloud 3d
+        print("Converting point3d.bin to .ply.")
+        try:
+            xyz, rgb, _ = read_points3D_binary(bin_path)
+        except:
+            xyz, rgb, _ = read_points3D_text(txt_path)
+        storePly(ply_path, xyz, rgb)
         pcd = fetchPly(ply_path)
-    except:
-        pcd = None
+        pcd_lidar = readPointcloud(path, ply_path)
+        if pcd_lidar is not None:
+            pcd = merge_pointclouds(pcd, pcd_lidar)
 
     scene_info = SceneInfo(point_cloud=pcd,
                            train_cameras=train_cam_infos,
