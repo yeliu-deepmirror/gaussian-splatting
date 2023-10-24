@@ -80,6 +80,14 @@ class Scene:
         print("  - Load", len(self.test_cameras), "Test Cameras")
         self.reset_train_test_ids()
 
+        if not self.args.load_dynamic:
+            print("  - Load all the images.")
+            self.train_cameras_list = {}
+            self.test_cameras_list = {}
+            for resolution_scale in resolution_scales:
+                self.train_cameras_list[resolution_scale] = cameraList_from_camInfos(scene_info.train_cameras, resolution_scale, args)
+                self.test_cameras_list[resolution_scale] = cameraList_from_camInfos(scene_info.test_cameras, resolution_scale, args)
+
         if self.loaded_iter:
             self.gaussians.load_ply(os.path.join(self.model_path, "point_cloud", "iteration_" + str(self.loaded_iter), "point_cloud.ply"))
         else:
@@ -106,6 +114,9 @@ class Scene:
             current_size = len(self.train_ids[scale])
 
         train_id = self.train_ids[scale].pop(randint(0, current_size - 1))
+        if not self.args.load_dynamic:
+            return self.train_cameras_list[scale][train_id]
+
         camera = self.train_cameras[train_id]
         return loadCam(self.args, train_id, camera, scale) # read image from file
 
