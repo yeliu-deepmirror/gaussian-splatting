@@ -58,11 +58,6 @@ bazel run -c opt //map/tools:transform_pointcloud_main -- \
 
 ### Running
 
-convert colmap built data session:
-```
-python convert.py -s ./Data/${SESSION_NAME}/colmap --skip_matching
-```
-
 To run the optimizer, simply use :
 ```
 python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 1 --iterations 30_000

@@ -182,13 +182,13 @@ def readPointcloud(path, save_ply_path):
 def readColmapSceneInfo(path, images, eval, front_only=False, cut_ratio=0.0, llffhold=8):
     print("Read Colmap model from", path)
     try:
-        cameras_extrinsic_file = os.path.join(path, "sparse/0", "images.bin")
-        cameras_intrinsic_file = os.path.join(path, "sparse/0", "cameras.bin")
+        cameras_extrinsic_file = os.path.join(path, "sparse", "images.bin")
+        cameras_intrinsic_file = os.path.join(path, "sparse", "cameras.bin")
         cam_extrinsics = read_extrinsics_binary(cameras_extrinsic_file)
         cam_intrinsics = read_intrinsics_binary(cameras_intrinsic_file)
     except:
-        cameras_extrinsic_file = os.path.join(path, "sparse/0", "images.txt")
-        cameras_intrinsic_file = os.path.join(path, "sparse/0", "cameras.txt")
+        cameras_extrinsic_file = os.path.join(path, "sparse", "images.txt")
+        cameras_intrinsic_file = os.path.join(path, "sparse", "cameras.txt")
         cam_extrinsics = read_extrinsics_text(cameras_extrinsic_file)
         cam_intrinsics = read_intrinsics_text(cameras_intrinsic_file)
 
@@ -207,9 +207,9 @@ def readColmapSceneInfo(path, images, eval, front_only=False, cut_ratio=0.0, llf
 
     nerf_normalization = getNerfppNorm(train_cam_infos)
 
-    ply_path = os.path.join(path, "sparse/0/points3D.ply")
-    bin_path = os.path.join(path, "sparse/0/points3D.bin")
-    txt_path = os.path.join(path, "sparse/0/points3D.txt")
+    ply_path = os.path.join(path, "sparse/points3D.ply")
+    bin_path = os.path.join(path, "sparse/points3D.bin")
+    txt_path = os.path.join(path, "sparse/points3D.txt")
     if True:  # always remake the initial point cloud 3d
         print("Converting point3d.bin to .ply.")
         try:
