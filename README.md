@@ -58,6 +58,11 @@ bazel run -c opt //map/tools:transform_pointcloud_main -- \
 
 ### Running
 
+git clone project
+```
+git clone https://github.com/yeliu-deepmirror/gaussian-splatting --recursive
+```
+
 To run the optimizer, simply use :
 ```
 python train.py --source_path ./Data/${SESSION_NAME}/colmap --resolution 1 --iterations 30_000
