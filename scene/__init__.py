@@ -85,8 +85,8 @@ class Scene:
             self.train_cameras_list = {}
             self.test_cameras_list = {}
             for resolution_scale in resolution_scales:
-                self.train_cameras_list[resolution_scale] = cameraList_from_camInfos(scene_info.train_cameras, resolution_scale, args)
-                self.test_cameras_list[resolution_scale] = cameraList_from_camInfos(scene_info.test_cameras, resolution_scale, args)
+                self.train_cameras_list[resolution_scale] = cameraList_from_camInfos(scene_info.train_cameras, resolution_scale, args, "train")
+                self.test_cameras_list[resolution_scale] = cameraList_from_camInfos(scene_info.test_cameras, resolution_scale, args, "test")
 
         if self.loaded_iter:
             self.gaussians.load_ply(os.path.join(self.model_path, "point_cloud", "iteration_" + str(self.loaded_iter), "point_cloud.ply"))
