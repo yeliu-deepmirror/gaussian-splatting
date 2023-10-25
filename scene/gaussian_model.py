@@ -438,6 +438,15 @@ class GaussianModel:
         self.xyz_gradient_accum = torch.zeros((self.get_xyz.shape[0], 1), device="cuda")
         self.denom = torch.zeros((self.get_xyz.shape[0], 1), device="cuda")
 
+    def remove_undergound_points(self, ground_threshold = 5.0):
+        # GS failed for ground points, remove too far underground points
+        # (since our scene is guaranteed to be flat)
+        # ground direction is y pointing downwards
+        prune_mask = (self._xyz[:,1] > ground_threshold).squeeze()
+        if self.verbose:
+            print("  - remove ground prune_points :", prune_mask.sum())
+        self.prune_points(prune_mask)
+
 
     def add_densification_stats(self, viewspace_point_tensor, update_filter):
         self.xyz_gradient_accum[update_filter] += torch.norm(viewspace_point_tensor.grad[update_filter,:2], dim=-1, keepdim=True)
