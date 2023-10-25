@@ -427,7 +427,7 @@ class GaussianModel:
     def reset_accum_values_and_remove_low_visibility_points(self):
         # should process at each full loop (all the images been processed)
         # remove low visibility points
-        prune_mask = (self.denom < 3).squeeze()
+        prune_mask = (self.denom < 2).squeeze()
         if self.verbose:
             print("  - reset prune_points :", prune_mask.sum())
         self.prune_points(prune_mask)
