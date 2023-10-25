@@ -73,6 +73,7 @@ class Scene:
             random.shuffle(scene_info.test_cameras)  # Multi-res consistent random shuffling
 
         self.cameras_extent = scene_info.nerf_normalization["radius"]
+        self.nerf_normalization = scene_info.nerf_normalization
         self.train_cameras = scene_info.train_cameras
         self.test_cameras = scene_info.test_cameras
         print("  - Nerf Normalization:", scene_info.nerf_normalization)
@@ -95,6 +96,8 @@ class Scene:
         del scene_info
         gc.collect()
 
+    def max_height(self):
+        return self.nerf_normalization["cameras_max"][2]
 
     def save(self, iteration):
         point_cloud_path = os.path.join(self.model_path, "point_cloud/iteration_{}".format(iteration + self.iteration_offset))

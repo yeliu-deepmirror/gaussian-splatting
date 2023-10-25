@@ -63,8 +63,9 @@ def getNerfppNorm(cam_info):
     radius = diagonal * 1.1
 
     translate = -center
-
-    return {"translate": translate, "radius": radius}
+    return {"translate": translate, "radius": radius,
+            "cameras_min": np.min(np.array(cam_centers), axis=0).squeeze(),
+            "cameras_max": np.max(np.array(cam_centers), axis=0).squeeze()}
 
 def name_to_timestamp(name):
     return int(name.split("/")[1].split(".")[0])
