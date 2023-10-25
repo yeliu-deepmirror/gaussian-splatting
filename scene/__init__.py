@@ -112,6 +112,7 @@ class Scene:
         if current_size == 0: # reload the ids
             self.reset_train_test_ids()
             current_size = len(self.train_ids[scale])
+            self.gaussians.reset_accum_values_and_remove_low_visibility_points()
 
         train_id = self.train_ids[scale].pop(randint(0, current_size - 1))
         if not self.args.load_dynamic:
