@@ -21,9 +21,9 @@ class BasicPointCloud(NamedTuple):
 
 
 def merge_pointclouds(pcl1 : BasicPointCloud, pcl2 : BasicPointCloud):
-    points = np.concatenate([pcl1.points, pcl1.points], axis=0)
-    colors = np.concatenate([pcl1.colors, pcl1.colors], axis=0)
-    normals = np.concatenate([pcl1.normals, pcl1.normals], axis=0)
+    points = np.concatenate([pcl1.points, pcl2.points], axis=0)
+    colors = np.concatenate([pcl1.colors, pcl2.colors], axis=0)
+    normals = np.concatenate([pcl1.normals, pcl2.normals], axis=0)
     return BasicPointCloud(points=points, colors=colors, normals=normals)
 
 

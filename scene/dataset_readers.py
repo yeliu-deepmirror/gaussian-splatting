@@ -222,6 +222,7 @@ def readColmapSceneInfo(path, images, eval, front_only=False, cut_ratio=0.0, llf
         pcd_lidar = readPointcloud(path, ply_path)
         if pcd_lidar is not None:
             pcd = merge_pointclouds(pcd, pcd_lidar)
+            storePly(ply_path, pcd.points, pcd.colors)
 
     scene_info = SceneInfo(point_cloud=pcd,
                            train_cameras=train_cam_infos,

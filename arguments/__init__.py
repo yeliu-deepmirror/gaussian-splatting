@@ -54,6 +54,7 @@ class ModelParams(ParamGroup):
         self._white_background = False
         self.front_only = False
         self.load_dynamic = False
+        self.remove_unseen_points = False
         self.cut_ratio = 0.02
         self.data_device = "cuda"
         self.eval = False
