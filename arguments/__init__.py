@@ -53,6 +53,9 @@ class ModelParams(ParamGroup):
         self._resolution = -1
         self._white_background = False
         self.front_only = False
+        self.load_dynamic = False
+        self.remove_unseen_points = False
+        self.cut_ratio = 0.02
         self.data_device = "cuda"
         self.eval = False
         super().__init__(parser, "Loading Parameters", sentinel)
@@ -67,6 +70,8 @@ class PipelineParams(ParamGroup):
         self.convert_SHs_python = False
         self.compute_cov3D_python = False
         self.debug = False
+        self.verbose = False
+        self.remove_ground = False
         super().__init__(parser, "Pipeline Parameters")
 
 class OptimizationParams(ParamGroup):
@@ -88,6 +93,7 @@ class OptimizationParams(ParamGroup):
         self.densify_until_iter = 15_000
         self.densify_grad_threshold = 0.0002
         self.random_background = False
+        self.opacity_threshold = 0.005
         super().__init__(parser, "Optimization Parameters")
 
 def get_combined_args(parser : ArgumentParser):

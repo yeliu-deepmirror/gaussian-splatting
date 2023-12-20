@@ -47,7 +47,7 @@ class Scene:
                 print("Loading trained model at iteration {}".format(self.loaded_iter))
 
         if os.path.exists(os.path.join(args.source_path, "sparse")):
-            scene_info = sceneLoadTypeCallbacks["Colmap"](args.source_path, args.images, args.eval, args.front_only)
+            scene_info = sceneLoadTypeCallbacks["Colmap"](args.source_path, args.images, args.eval, args.front_only, args.cut_ratio)
         elif os.path.exists(os.path.join(args.source_path, "transforms_train.json")):
             print("Found transforms_train.json file, assuming Blender data set!")
             scene_info = sceneLoadTypeCallbacks["Blender"](args.source_path, args.white_background, args.eval)
@@ -73,12 +73,21 @@ class Scene:
             random.shuffle(scene_info.test_cameras)  # Multi-res consistent random shuffling
 
         self.cameras_extent = scene_info.nerf_normalization["radius"]
+        self.nerf_normalization = scene_info.nerf_normalization
         self.train_cameras = scene_info.train_cameras
         self.test_cameras = scene_info.test_cameras
         print("  - Nerf Normalization:", scene_info.nerf_normalization)
         print("  - Load", len(self.train_cameras), "Training Cameras")
         print("  - Load", len(self.test_cameras), "Test Cameras")
         self.reset_train_test_ids()
+
+        if not self.args.load_dynamic:
+            print("  - Load all the images.")
+            self.train_cameras_list = {}
+            self.test_cameras_list = {}
+            for resolution_scale in resolution_scales:
+                self.train_cameras_list[resolution_scale] = cameraList_from_camInfos(scene_info.train_cameras, resolution_scale, args, "train")
+                self.test_cameras_list[resolution_scale] = cameraList_from_camInfos(scene_info.test_cameras, resolution_scale, args, "test")
 
         if self.loaded_iter:
             self.gaussians.load_ply(os.path.join(self.model_path, "point_cloud", "iteration_" + str(self.loaded_iter), "point_cloud.ply"))
@@ -87,6 +96,8 @@ class Scene:
         del scene_info
         gc.collect()
 
+    def max_height(self):
+        return self.nerf_normalization["cameras_max"][2]
 
     def save(self, iteration):
         point_cloud_path = os.path.join(self.model_path, "point_cloud/iteration_{}".format(iteration + self.iteration_offset))
@@ -104,8 +115,13 @@ class Scene:
         if current_size == 0: # reload the ids
             self.reset_train_test_ids()
             current_size = len(self.train_ids[scale])
+            if self.args.remove_unseen_points:
+                self.gaussians.reset_accum_values_and_remove_low_visibility_points()
 
         train_id = self.train_ids[scale].pop(randint(0, current_size - 1))
+        if not self.args.load_dynamic:
+            return self.train_cameras_list[scale][train_id]
+
         camera = self.train_cameras[train_id]
         return loadCam(self.args, train_id, camera, scale) # read image from file
 

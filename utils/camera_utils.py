@@ -12,6 +12,7 @@
 from scene.cameras import Camera
 import numpy as np
 from PIL import Image
+from tqdm import tqdm
 from utils.general_utils import PILtoTorch
 from utils.graphics_utils import fov2focal
 
@@ -55,11 +56,16 @@ def loadCam(args, id, cam_info, resolution_scale):
                   image=gt_image, gt_alpha_mask=loaded_mask,
                   image_name=cam_info.image_name, uid=id, data_device=args.data_device)
 
-def cameraList_from_camInfos(cam_infos, resolution_scale, args):
+def cameraList_from_camInfos(cam_infos, resolution_scale, args, name = ""):
     camera_list = []
+    if len(cam_infos) == 0:
+        return camera_list
 
+    progress_bar = tqdm(range(0, len(cam_infos)), desc="Loading " + name)
     for id, c in enumerate(cam_infos):
+        progress_bar.update(1)
         camera_list.append(loadCam(args, id, c, resolution_scale))
+    progress_bar.close()
 
     return camera_list
 
